@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ▼ここからiOS対応 (PWA) のための追加タグ▼ -->
+    
+    <!-- フルスクリーンで起動させる -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- 上部のステータスバーのスタイル -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- ホーム画面に追加したときの名前 -->
+    <meta name="apple-mobile-web-app-title" content="Caチェック">
+    
+    <!-- 
+      ホーム画面用アイコンを指定 (別途アイコン画像ファイルが必要です)
+      <link rel="apple-touch-icon" href="/icon-192.png"> 
+    -->
+    
+    <!-- ▲ここまで追加▲ -->
+
+    <title>Ca摂取スコア推定アプリ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* フォント設定 */
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        }
+        /* 選択肢のホバー/アクティブ時スタイル */
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .option-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        /* フェードインアニメーション */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-blue-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <!-- メインコンテナ -->
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-auto overflow-hidden">
+        
+        <!-- ヘッダー -->
+        <header class="bg-blue-600 text-white p-6 text-center">
+            <h1 class="text-2xl font-bold">カルシウム摂取スコア推定</h1>
+            <p class="text-blue-100 mt-1">あなたの食生活をチェックしてみましょう</p>
+        </header>
+
+        <!-- メインコンテンツエリア -->
+        <main class="p-6 md:p-8">
+
+            <!-- 質問コンテナ -->
+            <div id="question-container">
+                <!-- プログレスバー -->
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                    <div id="progress-bar" class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <!-- 質問文 -->
+                <h2 id="question-text" class="text-xl font-semibold mb-6 text-gray-900" style="min-height: 5em;"></h2>
+                
+                <!-- ▼▼▼ [新規追加] 質問画像コンテナ ▼▼▼ -->
+                <div id="question-image-container" class="my-4 text-center" style="min-height: 150px;">
+                    <img id="question-image" src="" alt="質問の挿絵" class="max-w-full h-auto max-h-48 mx-auto rounded-lg shadow-md hidden">
+                </div>
+                <!-- ▲▲▲ [新規追加] 質問画像コンテナ ▲▲▲ -->
+
+                <!-- 選択肢エリア -->
+                <div id="options-container" class="space-y-3">
+                    <!-- 選択肢はJSによってここに挿入されます -->
+                </div>
+
+                <!-- ▼▼▼ [新規追加] 戻るボタン ▼▼▼ -->
+                <div class="mt-6 text-center">
+                    <button id="back-button" class="hidden w-full sm:w-auto bg-red-500 text-white py-2 px-6 rounded-lg font-medium shadow-md transition-all duration-300 hover:bg-red-600 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 option-button">
+                        前の質問に戻る
+                    </button>
+                </div>
+                <!-- ▲▲▲ [新規追加] 戻るボタン ▲▲▲ -->
+
+            </div>
+
+            <!-- 結果コンテナ (初期状態は非表示) -->
+            <div id="result-container" class="hidden text-center fade-in">
+                <h2 class="text-2xl font-bold mb-4">あなたの結果は...</h2>
+                
+                <!-- ランク表示 -->
+                <div id="rank-text" class="text-8xl font-bold mb-2 text-blue-600">A</div>
+                
+                <!-- スコア表示 -->
+                <div id="score-text" class="text-2xl font-semibold text-gray-700 mb-6">合計 0 点</div>
+                
+                <!-- フィードバック -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p id="feedback-text" class="text-gray-800"></p>
+                </div>
+
+                <!-- やり直しボタン -->
+                <button id="restart-button" class="mt-8 w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold shadow-md transition-all duration-300 option-button">
+                    もう一度チェックする
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- データ定義 ---
+
+        // PDFに基づいた質問と選択肢、スコアのデータ
+        const questions = [
+            {
+                question: "1. 牛乳を毎日どのくらい飲みますか？ (1回量: コップ1杯 160ml)",
+                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                image: "q01.jpeg",
+                options: [
+                    { text: "ほとんど飲ない", score: 0 },
+                    { text: "月1〜2回", score: 0.5 },
+                    { text: "週1〜2回", score: 1 },
+                    { text: "週3〜4回", score: 2 },
+                    { text: "ほとんど毎日", score: 4 }
+                ]
+            },
+            {
+                question: "2. ヨーグルトをよく食べますか？ (1回量: 1個 100g)",
+                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                image: "q02.jpeg",
+                options: [
+                    { text: "ほとんど食べない", score: 0 },
+                    { text: "週1〜2回", score: 0.5 },
+                    { text: "週3〜4回", score: 1 },
+                    { text: "ほとんど毎日", score: 2 },
+                    { text: "ほとんど毎日2個", score: 4 }
+                ]
+            },
+            {
+                question: "3. チーズ等の乳製品やスキムミルクをよく食べますか？",
+                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                image: "q03.jpeg",
+                options: [
+                    { text: "ほとんど食べない", score: 0 },
+                    { text: "週1〜2回", score: 0.5 },
+                    { text: "週3〜4回", score: 1 },
+                    { text: "ほとんど毎日", score: 2 },
+                    { text: "2種類以上毎日", score: 4 }
+                ]
+            },
+            {
+                question: "4. 大豆、納豆など豆類をよく食べますか？",
+                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                image: "q04.jpg",
+                options: [
+                    { text: "ほとんど食べない", score: 0 },
+                    { text: "週1〜2回", score: 0.5 },
+                    { text: "週3〜4回", score: 1 },
+                    { text: "ほとんど毎日", score: 2 },
+                    { text: "2種類以上毎日", score: 4 }
+                ]
+            },
+            {
+                question: "5. 豆腐、がんも、厚揚げなど大豆製品をよく食べますか？",
+                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                image: "q05.jpeg",
+                options: [
+                    { text: "ほとんど食べない", score: 0 },
+                    { text: "週1〜2回", score: 0.5 },
+                    { text: "週3〜4回", score: 1 },
+                    { text: "ほとんど毎日", score: 2 },
+                    { text: "2種類以上毎日", score: 4 }
+                ]
+            },
+            {
+                question: "6. ほうれん草、小松菜、チンゲン菜などの青菜をよく食べますか？",
+                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                image: "q06.jpg",
+                options: [
+                    { text: "ほとんど食べない", score: 0 },
+                    { text: "週1〜2回", score: 0.5 },
+                    { text: "週3〜4回", score: 1 },
+                    { text: "ほとんど毎日", score: 2 },
+                    { text: "2種類以上毎日", score: 4 }
+                ]
+            },
+            {
+                question: "7. 海藻類をよく食べますか？",
+                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                image: "q07.jpg",
+                options: [
+                    { text: "ほとんど食べない", score: 0 },
+                    { text: "週1〜2回", score: 0.5 },
+                    { text: "週3〜4回", score: 1 },
+                    { text: "ほとんど毎日", score: 2 }
+                ]
+            },
+            {
+                question: "8. シシャモ、丸干しいわしなど骨ごと食べられる魚を食べますか？",
+                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                image: "q08.jpg",
+                options: [
+                    { text: "ほとんど食べない", score: 0 },
+                    { text: "月1〜2回", score: 0.5 },
+                    { text: "週1〜2回", score: 1 },
+                    { text: "週3〜4回", score: 2 },
+                    { text: "ほとんど毎日", score: 4 }
+                ]
+            },
+            {
+                question: "9. しらす干し、干しエビなど小魚類を食べますか？",
+                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                image: "q09.jpg",
+                options: [
+                    { text: "ほとんど食べない", score: 0 },
+                    { text: "週1〜2回", score: 0.5 },
+                    { text: "週3〜4回", score: 1 },
+                    { text: "ほとんど毎日", score: 2 },
+                    { text: "2種類以上毎日", score: 4 }
+                ]
+            },
+            {
+                question: "10. 朝食、昼食、夕食と1日に3食を食べますか？",
+                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                image: "q10.jpg",
+                options: [
+                    { text: "1日1〜2食", score: 1 },
+                    { text: "欠食が多い", score: 2 },
+                    { text: "きちんと1日3食", score: 3 }
+                ]
+            }
+        ];
+
+        // --- DOM要素の取得 ---
+        const questionContainer = document.getElementById('question-container');
+        const questionText = document.getElementById('question-text');
+        // ▼▼▼ [新規追加] 画像要素を取得 ▼▼▼
+        const questionImageContainer = document.getElementById('question-image-container');
+        const questionImage = document.getElementById('question-image');
+        // ▲▲▲ [新規追加] ▲▲▲
+        const optionsContainer = document.getElementById('options-container');
+        const progressBar = document.getElementById('progress-bar');
+        
+        // ▼▼▼ [新規追加] 戻るボタンを取得 ▼▼▼
+        const backButton = document.getElementById('back-button');
+        // ▲▲▲ [新規追加] ▲▲▲
+        
+        const resultContainer = document.getElementById('result-container');
+        // ▼▼▼ [修正] 省略されていたDOM取得を復元 ▼▼▼
+        const rankText = document.getElementById('rank-text');
+        const scoreText = document.getElementById('score-text');
+        const feedbackText = document.getElementById('feedback-text');
+        // ▲▲▲ [修正] ▲▲▲
+        const restartButton = document.getElementById('restart-button');
+
+        // --- 状態変数 ---
+        let currentQuestionIndex = 0;
+        let totalScore = 0;
+        // ▼▼▼ [新規追加] スコア履歴を保存する配列 ▼▼▼
+        let scoreHistory = [];
+        // ▲▲▲ [新規追加] ▲▲▲
+
+
+        // --- 関数定義 ---
+
+        /**
+         * 質問を表示し、選択肢を生成する関数
+         */
+        function showQuestion() {
+            // 現在の質問データを取得
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            // 質問文を更新
+            questionText.textContent = currentQuestion.question;
+            questionText.classList.remove('fade-in'); // アニメーションクラスを一旦削除
+            void questionText.offsetWidth; // リフローをトリガー
+            questionText.classList.add('fade-in'); // アニメーションを再実行
+
+            // ▼▼▼ [新規追加] 画像の表示処理 ▼▼▼
+            if (currentQuestion.image) {
+                questionImage.src = currentQuestion.image;
+                questionImage.alt = `質問 ${currentQuestionIndex + 1} の挿絵`;
+                questionImage.classList.remove('hidden');
+                questionImage.classList.add('fade-in');
+                questionImageContainer.style.minHeight = 'auto'; // 画像がある場合は高さを自動に
+            } else {
+                questionImage.src = '';
+                questionImage.classList.add('hidden');
+                questionImageContainer.style.minHeight = '150px'; // 画像がない場合は高さを確保
+            }
+            // ▲▲▲ [新規追加] ▲▲▲
+
+            // プログレスバーを更新
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            // 選択肢コンテナをクリア
+            optionsContainer.innerHTML = '';
+
+            // 選択肢ボタンを生成
+            // ▼▼▼ [修正] 省略されていたボタン生成処理を復元 ▼▼▼
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option.text;
+                button.classList.add(
+                    'w-full', 'bg-white', 'border', 'border-gray-300', 'text-gray-800', 
+                    'py-3', 'px-5', 'rounded-lg', 'text-left', 'font-medium', 
+                    'transition-all', 'duration-300', 'hover:bg-blue-50', 'hover:border-blue-300', 
+                    'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-400', 'option-button'
+                );
+                button.addEventListener('click', () => selectOption(option.score));
+                optionsContainer.appendChild(button);
+            });
+            // ▲▲▲ [修正] ▲▲▲
+
+            // ▼▼▼ [新規追加] 戻るボタンの表示制御 ▼▼▼
+            if (currentQuestionIndex > 0) {
+                backButton.classList.remove('hidden');
+            } else {
+                backButton.classList.add('hidden');
+            }
+            // ▲▲▲ [新規追加] ▲▲▲
+        }
+
+        /**
+         * 選択肢が選ばれたときの処理
+         */
+        function selectOption(score) {
+            // スコアを加算
+            totalScore += score;
+            // ▼▼▼ [新規追加] スコア履歴を保存 ▼▼▼
+            scoreHistory.push(score);
+            // ▲▲▲ [新規追加] ▲▲▲
+            
+            // 次の質問へ
+            currentQuestionIndex++;
+
+            // 次の質問があるかチェック
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        /**
+         * 最終結果を表示する関数
+         */
+        function showResult() {
+            // 質問コンテナを非表示
+            questionContainer.classList.add('hidden');
+            
+            // 結果エリアを表示
+            resultContainer.classList.remove('hidden');
+
+            // ランクとフィードバックを決定
+            // ▼▼▼ [修正] 省略されていたロジックを復元 ▼▼▼
+            let rank = '';
+            let feedback = '';
+
+            if (totalScore >= 20) {
+                rank = 'A';
+                feedback = '1日に必要な800mg以上摂れています。このままバランスのとれた食事を続けましょう。';
+            } else if (totalScore >= 16) {
+                rank = 'B';
+                feedback = '1日に必要な800mgに少し足りません。20点になるよう、もう少しカルシウムを摂りましょう。';
+            } else if (totalScore >= 11) {
+                rank = 'C';
+                feedback = '1日600mgしか摂れていません。このままでは、骨がもろくなっていきます。あと5〜10点増やして20点になるよう、毎日の食事を工夫しましょう。';
+            } else if (totalScore >= 8) {
+                rank = 'D';
+                feedback = '必要な量の半分以下しか摂れていません。カルシウムの多い食品を今の2倍摂るようにがんばりましょう。';
+            } else {
+                rank = 'E';
+                feedback = 'カルシウムがほとんど摂れていません。このままでは骨が折れやすくなってとても危険です。食事をきちんと見直しましょう。';
+            }
+
+            // 結果をDOMに反映
+            rankText.textContent = rank;
+            scoreText.textContent = `合計 ${totalScore} 点`;
+            feedbackText.textContent = feedback;
+            // ▲▲▲ [修正] ▲▲▲
+        }
+
+        /**
+         * クイズをリセットする関数
+         */
+        function restartQuiz() {
+            // 状態変数をリセット
+            // ▼▼▼ [修正] 省略されていたロジックを復元 ▼▼▼
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            // ▼▼▼ [新規追加] スコア履歴をリセット ▼▼▼
+            scoreHistory = [];
+            // ▲▲▲ [新規追加] ▲▲▲
+
+            // 表示を切り替え
+            resultContainer.classList.add('hidden');
+            questionContainer.classList.remove('hidden');
+            // ▲▲▲ [修正] ▲▲▲
+
+            // 最初の質問を表示
+            showQuestion();
+        }
+
+        // ▼▼▼ [新規追加] 前の質問に戻る関数 ▼▼▼
+        /**
+         * 前の質問に戻る関数
+         */
+        function goBack() {
+            if (currentQuestionIndex > 0) {
+                // 1つ前の質問インデックスに戻す
+                currentQuestionIndex--;
+                
+                // 最後のスコア履歴を取り出し、合計から減算
+                const lastScore = scoreHistory.pop() || 0;
+                totalScore -= lastScore;
+                
+                // 前の質問を再表示
+                showQuestion();
+            }
+        }
+        // ▲▲▲ [新規追加] ▲▲▲
+
+        // --- イベントリスナー ---
+        // ▼▼▼ [修正] 省略されていたリスナーを復元 ▼▼▼
+        restartButton.addEventListener('click', restartQuiz);
+        // ▼▼▼ [新規追加] 戻るボタンのリスナー ▼▼▼
+        backButton.addEventListener('click', goBack);
+        // ▲▲▲ [新規追加] ▲▲▲
+
+        // --- 初期化 ---
+        // 最初の質問を表示
+        showQuestion();
+    </script>
+</body>
+</html>
+
