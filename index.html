@@ -232,9 +232,9 @@ n<!DOCTYPE html>
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q10.jpeg",
                 options: [
-                    { text: "1日1〜2食", score: 1 },
+                    { text: "1日1〜2食", score: 0.5 },
                     { text: "欠食が多い", score: 2 },
-                    { text: "きちんと1日3食", score: 3 }
+                    { text: "きちんと1日3食", score: 4 }
                 ]
             }
         ];
@@ -371,7 +371,7 @@ n<!DOCTYPE html>
                 feedback = '1日に必要な800mg以上摂れています。このままバランスのとれた食事を続けましょう。';
             } else if (totalScore >= 16) {
                 rank = 'B';
-                feedback = '1日に必要な800mgに少し足りません。20点になるよう、もう少しカルシウムを摂りましょう。';
+                feedback = '1日に必要な800mgに少し足りません。20点になるよう、もう少しカルシウムを摂りましょう。<br>5分でわかる！バランスのよい食事<br>https://www.youtube.com/watch?v=zllha9zfRwU';
             } else if (totalScore >= 11) {
                 rank = 'C';
                 feedback = '1日600mgしか摂れていません。このままでは、骨がもろくなっていきます。あと5〜10点増やして20点になるよう、毎日の食事を工夫しましょう。';
@@ -380,7 +380,7 @@ n<!DOCTYPE html>
                 feedback = '必要な量の半分以下しか摂れていません。カルシウムの多い食品を今の2倍摂るようにがんばりましょう。';
             } else {
                 rank = 'E';
-                feedback = 'カルシウムがほとんど摂れていません。このままでは骨が折れやすくなってとても危険です。食事をきちんと見直しましょう。';
+                feedback = 'カルシウムがほとんど摂れていません。このままでは骨が折れやすくなってとても危険です。食事をきちんと見直しましょう。<br>5分でわかる！バランスのよい食事<br>https://www.youtube.com/watch?v=zllha9zfRwU';
             }
 
             // 結果をDOMに反映
@@ -443,6 +443,7 @@ n<!DOCTYPE html>
     </script>
 </body>
 </html>
+
 
 
 
