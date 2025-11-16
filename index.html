@@ -115,14 +115,15 @@
         </main>
     </div>
 
-    <script>
+        <script>
         // --- データ定義 ---
 
         // PDFに基づいた質問と選択肢、スコアのデータ
         const questions = [
             {
-                question: "1. 牛乳を毎日どのくらい飲みますか？<br> (1回量: コップ1杯 160ml)",
-                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                // ▼▼▼ [修正] <br>タグを追加し、補足テキストにスタイルを適用 ▼▼▼
+                question: "1. 牛乳を毎日どのくらい飲みますか？<br><span class='text-base font-normal text-gray-600'>(1回量: コップ1杯 160ml)</span>",
+                // ▲▲▲ [修正] ▲▲▲
                 image: "q01.jpeg",
                 options: [
                     { text: "ほとんど飲まない", score: 0 },
@@ -133,8 +134,9 @@
                 ]
             },
             {
-                question: "2. ヨーグルトをよく食べますか？<br> (1回量: 1個 100g)",
-                // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
+                // ▼▼▼ [修正] <br>タグを追加し、補足テキストにスタイルを適用 ▼▼▼
+                question: "2. ヨーグルトをよく食べますか？<br><span class='text-base font-normal text-gray-600'>(1回量: 1個 100g)</span>",
+                // ▲▲▲ [修正] ▲▲▲
                 image: "q02.jpeg",
                 options: [
                     { text: "ほとんど食べない", score: 0 },
@@ -145,7 +147,7 @@
                 ]
             },
             {
-                question: "3. チーズ等の乳製品やスキムミルクをよく食べますか？<br>(6Pチーズ1個)",
+                question: "3. チーズ等の乳製品やスキムミルクをよく食べますか？<br><span class='text-base font-normal text-gray-600'>(6Pチーズ1個)</span>",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q03.jpeg",
                 options: [
@@ -157,7 +159,7 @@
                 ]
             },
             {
-                question: "4. 大豆、納豆など豆類をよく食べますか？<br>(納豆1P)",
+                question: "4. 大豆、納豆など豆類をよく食べますか？<br><span class='text-base font-normal text-gray-600'>(納豆1パック)</span>",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q04.jpeg",
                 options: [
@@ -169,7 +171,7 @@
                 ]
             },
             {
-                question: "5. 豆腐、がんも、厚揚げなど大豆製品をよく食べますか？<br>(豆腐 1/4丁)",
+                question: "5. 豆腐、がんも、厚揚げなど大豆製品をよく食べますか？<br><span class='text-base font-normal text-gray-600'>(豆腐 1/4丁)</span>",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q05.jpeg",
                 options: [
@@ -181,7 +183,7 @@
                 ]
             },
             {
-                question: "6. ほうれん草、小松菜、チンゲン菜などの青菜をよく食べますか？<br>(おひたし小鉢1杯)",
+                question: "6. ほうれん草、小松菜、チンゲン菜などの青菜をよく食べますか？<br><span class='text-base font-normal text-gray-600'>(おひたし小鉢1杯)</span>",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q06.jpeg",
                 options: [
@@ -193,7 +195,7 @@
                 ]
             },
             {
-                question: "7. 海藻類をよく食べますか？<br>(ひじき煮物小鉢1杯)",
+                question: "7. 海藻類をよく食べますか？<br><span class='text-base font-normal text-gray-600'>(ひじき煮物 小鉢1杯)</span>",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q07.jpeg",
                 options: [
@@ -204,7 +206,7 @@
                 ]
             },
             {
-                question: "8. シシャモ、丸干しいわしなど骨ごと食べられる魚を食べますか？<br>(シシャモ3-4尾)",
+                question: "8. シシャモ、丸干しいわしなど骨ごと食べられる魚を食べますか？<br><span class='text-base font-normal text-gray-600'>(シシャモ3-4尾)</span>",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q08.jpeg",
                 options: [
@@ -216,7 +218,7 @@
                 ]
             },
             {
-                question: "9. しらす干し、干しエビなど小魚類を食べますか？<br>(ちりめんじゃこ 大さじ3杯)",
+                question: "9. しらす干し、干しエビなど小魚類を食べますか？<br><span class='text-base font-normal text-gray-600'>(ちりめんじゃこ 大さじ3杯)</span>",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q09.jpeg",
                 options: [
@@ -279,7 +281,9 @@
             const currentQuestion = questions[currentQuestionIndex];
             
             // 質問文を更新
-            questionText.textContent = currentQuestion.question;
+            // ▼▼▼ [修正] textContent から innerHTML に変更 ▼▼▼
+            questionText.innerHTML = currentQuestion.question;
+            // ▲▲▲ [修正] ▲▲▲
             questionText.classList.remove('fade-in'); // アニメーションクラスを一旦削除
             void questionText.offsetWidth; // リフローをトリガー
             questionText.classList.add('fade-in'); // アニメーションを再実行
@@ -361,14 +365,13 @@
             // 結果エリアを表示
             resultContainer.classList.remove('hidden');
 
-         // ランクとフィードバックを決定
+            // ランクとフィードバックを決定
             // ▼▼▼ [修正] 省略されていたDOM取得を復元 ▼▼▼
             let rank = '';
             let feedback = '';
             // ▼▼▼ [新規追加] YouTubeリンクのHTML ▼▼▼
-            const youtubeLink = '<br><br>↓ 5分でわかる！骨に良い食事について動画で解説！<br><a href="https://www.youtube.com/watch?v=zllha9zfRwU" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-700 font-medium">https://www.youtube.com/watch?v=zllha9zfRwU</a>';
+            const youtubeLink = '<br><br>↓5分でわかる！ 骨に良い食事について動画で解説！<br><a href="https://www.youtube.com/watch?v=zllha9zfRwU" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-700 font-medium">https://www.youtube.com/watch?v=zllha9zfRwU</a>';
             // ▲▲▲ [新規追加] ▲▲▲
-
 
             if (totalScore >= 20) {
                 rank = 'A';
@@ -377,8 +380,8 @@
                 rank = 'B';
                 feedback = '1日に必要な800mgに少し足りません。20点になるよう、もう少しカルシウムを摂りましょう。';
                 // ▼▼▼ [修正] リンクを追加 ▼▼▼
-                feedback += youtubeLink;
-                  } else if (totalScore >= 11) {
+                feedback += youtubeLink;            
+} else if (totalScore >= 11) {
                 rank = 'C';
                 feedback = '1日600mgしか摂れていません。このままでは、骨がもろくなっていきます。あと5〜10点増やして20点になるよう、毎日の食事を工夫しましょう。';
                 // ▼▼▼ [修正] リンクを追加 ▼▼▼
@@ -395,7 +398,7 @@
                 feedback += youtubeLink;
             }
 
-         // 結果をDOMに反映
+            // 結果をDOMに反映
             rankText.textContent = rank;
             scoreText.textContent = `合計 ${totalScore} 点`;
             // ▼▼▼ [修正] textContentからinnerHTMLに変更し、HTMLタグをレンダリング ▼▼▼
@@ -456,4 +459,3 @@
     </script>
 </body>
 </html>
-
