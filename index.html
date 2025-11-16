@@ -1,4 +1,4 @@
-n<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -54,7 +54,7 @@ n<!DOCTYPE html>
         
         <!-- ヘッダー -->
         <header class="bg-blue-600 text-white p-6 text-center">
-            <h1 class="text-2xl font-bold">カルシウム摂取量推定</h1>
+            <h1 class="text-2xl font-bold">カルシウム摂取スコア推定</h1>
             <p class="text-blue-100 mt-1">あなたの食生活をチェックしてみましょう</p>
         </header>
 
@@ -121,7 +121,7 @@ n<!DOCTYPE html>
         // PDFに基づいた質問と選択肢、スコアのデータ
         const questions = [
             {
-                question: "1. 牛乳を毎日どのくらい飲みますか？ (1回量: コップ1杯 160ml)",
+                question: "1. 牛乳を毎日どのくらい飲みますか？<br> (1回量: コップ1杯 160ml)",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q01.jpeg",
                 options: [
@@ -133,7 +133,7 @@ n<!DOCTYPE html>
                 ]
             },
             {
-                question: "2. ヨーグルトをよく食べますか？ (1回量: 1個 100g)",
+                question: "2. ヨーグルトをよく食べますか？<br> (1回量: 1個 100g)",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q02.jpeg",
                 options: [
@@ -145,7 +145,7 @@ n<!DOCTYPE html>
                 ]
             },
             {
-                question: "3. チーズ等の乳製品やスキムミルクをよく食べますか？",
+                question: "3. チーズ等の乳製品やスキムミルクをよく食べますか？<br>(6Pチーズ1個)",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q03.jpeg",
                 options: [
@@ -157,7 +157,7 @@ n<!DOCTYPE html>
                 ]
             },
             {
-                question: "4. 大豆、納豆など豆類をよく食べますか？",
+                question: "4. 大豆、納豆など豆類をよく食べますか？<br>(納豆1P)",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q04.jpeg",
                 options: [
@@ -169,7 +169,7 @@ n<!DOCTYPE html>
                 ]
             },
             {
-                question: "5. 豆腐、がんも、厚揚げなど大豆製品をよく食べますか？",
+                question: "5. 豆腐、がんも、厚揚げなど大豆製品をよく食べますか？<br>(豆腐 1/4丁)",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q05.jpeg",
                 options: [
@@ -181,7 +181,7 @@ n<!DOCTYPE html>
                 ]
             },
             {
-                question: "6. ほうれん草、小松菜、チンゲン菜などの青菜をよく食べますか？",
+                question: "6. ほうれん草、小松菜、チンゲン菜などの青菜をよく食べますか？<br>(おひたし小鉢1杯)",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q06.jpeg",
                 options: [
@@ -193,7 +193,7 @@ n<!DOCTYPE html>
                 ]
             },
             {
-                question: "7. 海藻類をよく食べますか？",
+                question: "7. 海藻類をよく食べますか？<br>(ひじき煮物小鉢1杯)",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q07.jpeg",
                 options: [
@@ -204,7 +204,7 @@ n<!DOCTYPE html>
                 ]
             },
             {
-                question: "8. シシャモ、丸干しいわしなど骨ごと食べられる魚を食べますか？",
+                question: "8. シシャモ、丸干しいわしなど骨ごと食べられる魚を食べますか？<br>(シシャモ3-4尾)",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q08.jpeg",
                 options: [
@@ -216,7 +216,7 @@ n<!DOCTYPE html>
                 ]
             },
             {
-                question: "9. しらす干し、干しエビなど小魚類を食べますか？",
+                question: "9. しらす干し、干しエビなど小魚類を食べますか？<br>(ちりめんじゃこ 大さじ3杯)",
                 // ▼▼▼ [修正] 画像ファイル名を更新 ▼▼▼
                 image: "q09.jpeg",
                 options: [
@@ -361,32 +361,45 @@ n<!DOCTYPE html>
             // 結果エリアを表示
             resultContainer.classList.remove('hidden');
 
-            // ランクとフィードバックを決定
-            // ▼▼▼ [修正] 省略されていたロジックを復元 ▼▼▼
+         // ランクとフィードバックを決定
+            // ▼▼▼ [修正] 省略されていたDOM取得を復元 ▼▼▼
             let rank = '';
             let feedback = '';
+            // ▼▼▼ [新規追加] YouTubeリンクのHTML ▼▼▼
+            const youtubeLink = '<br><br>↓ 5分でわかる！骨に良い食事について動画で解説！<br><a href="https://www.youtube.com/watch?v=zllha9zfRwU" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-700 font-medium">https://www.youtube.com/watch?v=zllha9zfRwU</a>';
+            // ▲▲▲ [新規追加] ▲▲▲
+
 
             if (totalScore >= 20) {
                 rank = 'A';
                 feedback = '1日に必要な800mg以上摂れています。このままバランスのとれた食事を続けましょう。';
             } else if (totalScore >= 16) {
                 rank = 'B';
-                feedback = '1日に必要な800mgに少し足りません。20点になるよう、もう少しカルシウムを摂りましょう。<br>5分でわかる！バランスのよい食事<br>https://www.youtube.com/watch?v=zllha9zfRwU';
-            } else if (totalScore >= 11) {
+                feedback = '1日に必要な800mgに少し足りません。20点になるよう、もう少しカルシウムを摂りましょう。';
+                // ▼▼▼ [修正] リンクを追加 ▼▼▼
+                feedback += youtubeLink;
+                  } else if (totalScore >= 11) {
                 rank = 'C';
                 feedback = '1日600mgしか摂れていません。このままでは、骨がもろくなっていきます。あと5〜10点増やして20点になるよう、毎日の食事を工夫しましょう。';
+                // ▼▼▼ [修正] リンクを追加 ▼▼▼
+                feedback += youtubeLink;
             } else if (totalScore >= 8) {
                 rank = 'D';
                 feedback = '必要な量の半分以下しか摂れていません。カルシウムの多い食品を今の2倍摂るようにがんばりましょう。';
+                // ▼▼▼ [修正] リンクを追加 ▼▼▼
+                feedback += youtubeLink;
             } else {
                 rank = 'E';
-                feedback = 'カルシウムがほとんど摂れていません。このままでは骨が折れやすくなってとても危険です。食事をきちんと見直しましょう。<br>5分でわかる！バランスのよい食事<br>https://www.youtube.com/watch?v=zllha9zfRwU';
+                feedback = 'カルシウムがほとんど摂れていません。このままでは骨が折れやすくなってとても危険です。食事をきちんと見直しましょう。';
+                // ▼▼▼ [修正] リンクを追加 ▼▼▼
+                feedback += youtubeLink;
             }
 
-            // 結果をDOMに反映
+         // 結果をDOMに反映
             rankText.textContent = rank;
             scoreText.textContent = `合計 ${totalScore} 点`;
-            feedbackText.textContent = feedback;
+            // ▼▼▼ [修正] textContentからinnerHTMLに変更し、HTMLタグをレンダリング ▼▼▼
+            feedbackText.innerHTML = feedback;
             // ▲▲▲ [修正] ▲▲▲
         }
 
@@ -443,8 +456,4 @@ n<!DOCTYPE html>
     </script>
 </body>
 </html>
-
-
-
-
 
